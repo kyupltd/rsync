@@ -122,6 +122,7 @@ int blocking_io = -1;
 int checksum_seed = 0;
 int inplace = 0;
 int delay_updates = 0;
+int mount_ns_pid = 0;
 long block_size = 0; /* "long" because popt can't set an int32. */
 char *skip_compress = NULL;
 item_list dparam_list = EMPTY_ITEM_LIST;
@@ -790,6 +791,7 @@ void usage(enum logcode F)
   rprintf(F,"     --log-file-format=FMT   log updates using the specified FMT\n");
   rprintf(F,"     --password-file=FILE    read daemon-access password from FILE\n");
   rprintf(F,"     --list-only             list the files instead of copying them\n");
+  rprintf(F,"     --mount-ns-pid=PID      pid of the mount namespace to change to\n");
   rprintf(F,"     --bwlimit=RATE          limit socket I/O bandwidth\n");
 #ifdef HAVE_SETVBUF
   rprintf(F,"     --outbuf=N|L|B          set output buffering to None, Line, or Block\n");
@@ -1035,6 +1037,7 @@ static struct poptOption long_options[] = {
   {"outbuf",           0,  POPT_ARG_STRING, &outbuf_mode, 0, 0, 0 },
 #endif
   {"remote-option",   'M', POPT_ARG_STRING, 0, 'M', 0, 0 },
+  {"mount-ns-pid",     0,  POPT_ARG_INT,    &mount_ns_pid, 0, 0, 0 },
   {"protocol",         0,  POPT_ARG_INT,    &protocol_version, 0, 0, 0 },
   {"checksum-seed",    0,  POPT_ARG_INT,    &checksum_seed, 0, 0, 0 },
   {"server",           0,  POPT_ARG_NONE,   0, OPT_SERVER, 0, 0 },
