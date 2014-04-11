@@ -1292,3 +1292,23 @@ char *getpass(const char *prompt);
 #ifdef MAINTAINER_MODE
 const char *get_panic_action(void);
 #endif
+
+// This is a hack to make rsync build with setns for x86_64 architecture
+// We should fix the headers
+#define __NR_setns 308
+
+/* Define setns() if missing from the C library */
+#ifndef HAVE_SETNS
+static inline int setns(int fd, int nstype)
+{
+#ifdef __NR_setns
+	return syscall(__NR_setns, fd, nstype);
+#elif defined(__NR_set_ns)
+	return syscall(__NR_set_ns, fd, nstype);
+#else
+#error No setns implementation found
+	errno = ENOSYS;
+	return -1;
+#endif
+}
+#endif
