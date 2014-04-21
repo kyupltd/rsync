@@ -1568,13 +1568,14 @@ int main(int argc,char *argv[])
 	SIGACTION(SIGXFSZ, SIG_IGN);
 #endif
 
+#define PID_MAX_LEN 26
 	/* Change the mount namespace here, so both the parent and child
 	 * processes can share the same new mount namespace. */
 	if (mount_ns_pid != 0) {
-		char path[26] = {0};
+		char path[PID_MAX_LEN] = {0};
 		int ret = 0;
 		int fd = -1;
-		ret = snprintf(path, 26, "/proc/%d/ns/mnt", mount_ns_pid);
+		ret = snprintf(path, PID_MAX_LEN, "/proc/%d/ns/mnt", mount_ns_pid);
 		if (ret < 0)
 			return -1;
 		fd = open(path, O_NONBLOCK);
