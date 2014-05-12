@@ -901,6 +901,7 @@ struct stats {
 	int64 total_transferred_size;
 	int64 total_written;
 	int64 total_read;
+	int64 total_deleted;
 	int64 literal_data;
 	int64 matched_data;
 	int64 flist_buildtime;
