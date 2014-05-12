@@ -93,6 +93,7 @@ extern char backup_dir_buf[MAXPATHLEN];
 extern char *basis_dir[MAX_BASIS_DIRS+1];
 extern struct file_list *first_flist;
 extern filter_rule_list daemon_filter_list;
+extern int mount_ns_pid;
 
 uid_t our_uid;
 gid_t our_gid;
@@ -198,7 +199,7 @@ void write_del_stats(int f)
 	write_varint(f, stats.deleted_symlinks);
 	write_varint(f, stats.deleted_devices);
 	write_varint(f, stats.deleted_specials);
-	write_varint(f, stats.total_deleted);
+	write_varlong(f, stats.total_deleted, 3);
 }
 
 void read_del_stats(int f)
@@ -208,7 +209,7 @@ void read_del_stats(int f)
 	stats.deleted_files += stats.deleted_symlinks = read_varint(f);
 	stats.deleted_files += stats.deleted_devices = read_varint(f);
 	stats.deleted_files += stats.deleted_specials = read_varint(f);
-	stats.total_deleted = read_varint(f);
+	stats.total_deleted = read_varlong(f, 3);
 }
 
 /* This function gets called from all 3 processes.  We want the client side
@@ -246,12 +247,12 @@ static void handle_stats(int f)
 		if (am_sender) {
 			write_varlong30(f, total_read, 3);
 			write_varlong30(f, total_written, 3);
+			write_varlong30(f, total_deleted, 3);
 			write_varlong30(f, stats.total_size, 3);
 			if (protocol_version >= 29) {
 				write_varlong30(f, stats.flist_buildtime, 3);
 				write_varlong30(f, stats.flist_xfertime, 3);
 			}
-			write_varlong30(f, total_deleted, 3);
 		}
 		return;
 	}
@@ -265,23 +266,23 @@ static void handle_stats(int f)
 		 * read/write swaps when switching from sender to receiver. */
 		total_written = read_varlong30(f, 3);
 		total_read = read_varlong30(f, 3);
+		stats.total_deleted = total_deleted = read_varlong30(f, 3);
 		stats.total_size = read_varlong30(f, 3);
 		if (protocol_version >= 29) {
 			stats.flist_buildtime = read_varlong30(f, 3);
 			stats.flist_xfertime = read_varlong30(f, 3);
 		}
-		total_deleted = read_varlong30(f, 3);
 	} else if (write_batch) {
 		/* The --read-batch process is going to be a client
 		 * receiver, so we need to give it the stats. */
 		write_varlong30(batch_fd, total_read, 3);
 		write_varlong30(batch_fd, total_written, 3);
+		write_varlong30(batch_fd, total_deleted, 3);
 		write_varlong30(batch_fd, stats.total_size, 3);
 		if (protocol_version >= 29) {
 			write_varlong30(batch_fd, stats.flist_buildtime, 3);
 			write_varlong30(batch_fd, stats.flist_xfertime, 3);
 		}
-		write_varlong30(batch_fd, total_deleted, 3);
 	}
 }
 
