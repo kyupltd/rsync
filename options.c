@@ -177,6 +177,7 @@ int copy_dest = 0;
 int link_dest = 0;
 int basis_dir_cnt = 0;
 char *dest_option = NULL;
+int do_stats = 0;
 
 static int remote_option_alloc = 0;
 int remote_option_cnt = 0;
@@ -290,7 +291,6 @@ static struct output_struct debug_words[COUNT_DEBUG+1] = {
 };
 
 static int verbose = 0;
-static int do_stats = 0;
 static int do_progress = 0;
 static int daemon_opt;   /* sets am_daemon after option error-reporting */
 static int omit_dir_times = 0;
