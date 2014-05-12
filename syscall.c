@@ -40,6 +40,8 @@ extern int read_only;
 extern int list_only;
 extern int preserve_perms;
 extern int preserve_executability;
+extern int do_stats;
+extern struct stats stats;
 
 #define RETURN_ERROR_IF(x,e) \
 	do { \
@@ -54,6 +56,7 @@ extern int preserve_executability;
 int do_unlink(const char *fname)
 {
 	if (dry_run) return 0;
+	get_unlink_size(fname);
 	RETURN_ERROR_IF_RO_OR_LO;
 	return unlink(fname);
 }
