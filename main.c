@@ -123,7 +123,7 @@ struct pid_status {
 } pid_stat_table[MAXCHILDPROCS];
 
 static time_t starttime, endtime;
-static int64 total_read, total_written;
+static int64 total_read, total_written, total_deleted;
 
 static void show_malloc_stats(void);
 
@@ -198,6 +198,7 @@ void write_del_stats(int f)
 	write_varint(f, stats.deleted_symlinks);
 	write_varint(f, stats.deleted_devices);
 	write_varint(f, stats.deleted_specials);
+	write_varint(f, stats.total_deleted);
 }
 
 void read_del_stats(int f)
@@ -207,6 +208,7 @@ void read_del_stats(int f)
 	stats.deleted_files += stats.deleted_symlinks = read_varint(f);
 	stats.deleted_files += stats.deleted_devices = read_varint(f);
 	stats.deleted_files += stats.deleted_specials = read_varint(f);
+	stats.total_deleted = read_varint(f);
 }
 
 /* This function gets called from all 3 processes.  We want the client side
@@ -224,6 +226,7 @@ static void handle_stats(int f)
 	/* Cache two stats because the read/write code can change it. */
 	total_read = stats.total_read;
 	total_written = stats.total_written;
+	total_deleted = stats.total_deleted;
 
 	if (INFO_GTE(STATS, 3)) {
 		/* These come out from every process */
@@ -248,6 +251,7 @@ static void handle_stats(int f)
 				write_varlong30(f, stats.flist_buildtime, 3);
 				write_varlong30(f, stats.flist_xfertime, 3);
 			}
+			write_varlong30(f, total_deleted, 3);
 		}
 		return;
 	}
@@ -266,6 +270,7 @@ static void handle_stats(int f)
 			stats.flist_buildtime = read_varlong30(f, 3);
 			stats.flist_xfertime = read_varlong30(f, 3);
 		}
+		total_deleted = read_varlong30(f, 3);
 	} else if (write_batch) {
 		/* The --read-batch process is going to be a client
 		 * receiver, so we need to give it the stats. */
@@ -276,6 +281,7 @@ static void handle_stats(int f)
 			write_varlong30(batch_fd, stats.flist_buildtime, 3);
 			write_varlong30(batch_fd, stats.flist_xfertime, 3);
 		}
+		write_varlong30(batch_fd, total_deleted, 3);
 	}
 }
 
@@ -334,13 +340,15 @@ static void output_summary(void)
 			human_num(total_written));
 		rprintf(FINFO,"Total bytes received: %s\n",
 			human_num(total_read));
+		rprintf(FINFO,"Total bytes deleted: %s\n",
+			human_num(total_deleted));
 	}
 
 	if (INFO_GTE(STATS, 1)) {
 		rprintf(FCLIENT, "\n");
 		rprintf(FINFO,
-			"sent %s bytes  received %s bytes  %s bytes/sec\n",
-			human_num(total_written), human_num(total_read),
+			"sent %s bytes  received %s bytes  deleted %s bytes  %s bytes/sec\n",
+			human_num(total_written), human_num(total_read), human_num(total_deleted),
 			human_dnum((total_written + total_read)/(0.5 + (endtime - starttime)), 2));
 		rprintf(FINFO, "total size is %s  speedup is %s%s\n",
 			human_num(stats.total_size),
