@@ -30,6 +30,7 @@
 #include "rsync.h"
 #include "ifuncs.h"
 #include "inums.h"
+#include "1h.h"
 
 /** If no timeout is specified then use a 60 second select timeout */
 #define SELECT_TIMEOUT 60
@@ -1529,8 +1530,10 @@ static void read_a_msg(void)
 		/* A directory name was sent with the trailing null */
 		if (msg_bytes > 0 && !data[msg_bytes-1])
 			log_delete(data, S_IFDIR);
+			get_unlink_size(data);
 		else {
 			data[msg_bytes] = '\0';
+			get_unlink_size(data);
 			log_delete(data, S_IFREG);
 		}
 		break;
