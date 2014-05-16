@@ -1528,10 +1528,10 @@ static void read_a_msg(void)
 			raw_read_buf(data, msg_bytes);
 		iobuf.in_multiplexed = 1;
 		/* A directory name was sent with the trailing null */
-		if (msg_bytes > 0 && !data[msg_bytes-1])
+		if (msg_bytes > 0 && !data[msg_bytes-1]) {
 			log_delete(data, S_IFDIR);
 			get_unlink_size(data);
-		else {
+		} else {
 			data[msg_bytes] = '\0';
 			get_unlink_size(data);
 			log_delete(data, S_IFREG);
