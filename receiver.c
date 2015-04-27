@@ -891,6 +891,9 @@ int recv_files(int f_in, int f_out, char *local_name)
 		if (read_batch)
 			file->flags |= FLAG_FILE_SENT;
 
+		if (recv_ok && recv_ok != -1 && !(iflags & ITEM_IS_NEW))
+			stats.total_overwritten += st.st_size;
+
 		switch (recv_ok) {
 		case 2:
 			break;
