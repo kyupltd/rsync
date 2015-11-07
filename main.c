@@ -342,14 +342,16 @@ static void output_summary(void)
 		rprintf(FINFO,"Total bytes received: %s\n",
 			human_num(total_read));
 		rprintf(FINFO,"Total bytes deleted: %s\n",
-			human_num(total_deleted));
+			human_num(stats.total_deleted));
+		rprintf(FINFO,"Total bytes overwritten: %s\n",
+			human_num(stats.total_overwritten));
 	}
 
 	if (INFO_GTE(STATS, 1)) {
 		rprintf(FCLIENT, "\n");
 		rprintf(FINFO,
-			"sent %s bytes  received %s bytes  deleted %s bytes  %s bytes/sec\n",
-			human_num(total_written), human_num(total_read), human_num(total_deleted),
+			"sent %s bytes  received %s bytes  deleted %s bytes overwritten %s bytes %s bytes/sec\n",
+			human_num(total_written), human_num(total_read), human_num(stats.total_deleted), human_num(stats.total_overwritten),
 			human_dnum((total_written + total_read)/(0.5 + (endtime - starttime)), 2));
 		rprintf(FINFO, "total size is %s  speedup is %s%s\n",
 			human_num(stats.total_size),
